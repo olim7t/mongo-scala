@@ -1,0 +1,1 @@
+MongoDB workshop in Scala.
