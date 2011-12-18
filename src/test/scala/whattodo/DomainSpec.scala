@@ -1,4 +1,5 @@
-import com.mongodb.casbah.commons.MongoDBObject
+package whattodo
+
 import org.joda.time.DateTime
 
 class DomainSpec extends SpecBase with Configuration with MongoClient with Domain {
@@ -25,6 +26,21 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       assert(savedEvent._id.isDefined)
       and("the number of events is incremented")
       assert(eventRepository.count == countBeforeSave + 1)
+    }
+
+    scenario("An event is searched by id") {
+      given("the id of a freshly saved event")
+      val savedEvent = eventRepository.save(newEvent)
+      val id = savedEvent._id.getOrElse(fail("saved event should have an id"))
+
+      when("looking for the event with this id")
+      val searchResult = eventRepository.findById(id)
+
+      then("we get back the same event")
+      searchResult match {
+        case None => fail("found event doesn't match")
+        case Some(foundEvent) => assert(foundEvent == savedEvent)
+      }
     }
   }
 

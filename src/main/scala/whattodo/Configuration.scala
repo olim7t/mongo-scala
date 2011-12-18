@@ -1,3 +1,5 @@
+package whattodo
+
 trait Configuration {
 
   def mongoHost: String

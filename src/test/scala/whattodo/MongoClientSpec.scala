@@ -1,3 +1,5 @@
+package whattodo
+
 class MongoClientSpec extends SpecBase with Configuration with MongoClient {
 
   val mongoHost = "localhost"
