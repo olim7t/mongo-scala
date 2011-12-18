@@ -29,7 +29,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
     }
 
     scenario("An event is searched by id") {
-      given("the id of a freshly saved event")
+      given("the id of a persisted event")
       val savedEvent = eventRepository.save(newEvent)
       val id = savedEvent._id.getOrElse(fail("saved event should have an id"))
 
@@ -41,6 +41,20 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
         case None => fail("found event doesn't match")
         case Some(foundEvent) => assert(foundEvent == savedEvent)
       }
+    }
+
+    scenario("An event is removed") {
+      given("the id of a persisted event")
+      val savedEvent = eventRepository.save(newEvent)
+      val id = savedEvent._id.getOrElse(fail("saved event should have an id"))
+      and("the current number of events")
+      val countBeforeRemove = eventRepository.count
+
+      when("the event with this id is removed")
+      eventRepository.removeById(id)
+
+      then("the number of events is decremented")
+      assert(eventRepository.count == countBeforeRemove - 1)
     }
   }
 

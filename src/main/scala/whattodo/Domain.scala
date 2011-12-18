@@ -35,6 +35,8 @@ trait Domain {
       dbToEvent(dbObject)
     }
 
+    def removeById(id: ObjectId) = mongoDb("events").remove(MongoDBObject("_id" -> id))
+
     def count = mongoDb("events").size
 
     private def eventToDb(event: Event): DBObject = grater[Event].asDBObject(event)
