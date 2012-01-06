@@ -24,9 +24,9 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       val savedEvent = eventRepository.save(transientEvent)
 
       then("we get a new event instance with an id")
-      assert(savedEvent._id.isDefined)
+      savedEvent._id should be('defined)
       and("the number of events is incremented")
-      assert(eventRepository.count == countBeforeSave + 1)
+      eventRepository.count should equal(countBeforeSave +1)
     }
 
     scenario("An event is searched by id") {
@@ -40,7 +40,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       then("we get back the same event")
       searchResult match {
         case None => fail("found event doesn't match")
-        case Some(foundEvent) => assert(foundEvent == savedEvent)
+        case Some(foundEvent) => foundEvent should equal(savedEvent)
       }
     }
 
@@ -55,7 +55,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       eventRepository.removeById(id)
 
       then("the number of events is decremented")
-      assert(eventRepository.count == countBeforeRemove - 1)
+      eventRepository.count should equal(countBeforeRemove - 1)
     }
   }
 
@@ -77,7 +77,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       val sessionCountAfter = eventRepository.findById(eventId).
         getOrElse(fail("event should exist in the database")).
         sessions.size
-      assert(sessionCountAfter == sessionCountBefore + 1)
+      sessionCountAfter should equal(sessionCountBefore + 1)
     }
 
     scenario("The name of all the events at a given date is updated") {
@@ -88,21 +88,20 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       eventRepository.renameByDate(date, "NewName")
 
       then("the count of elements with the new name is 99")
-      assert(eventRepository.countWithName("NewName") == 99)
+      eventRepository.countWithName("NewName") should equal(99)
     }
   }
 
 
-  feature("Queries can take multiple criteria") {
+  feature("Queries can use multiple criteria") {
 
     scenario("Jazz events are searched in Paris") {
       when("searching")
       val events = eventRepository.findLast10By(town = "Paris", descriptionContains = "jazz")
 
       then("the first element matches the expected result")
-      assert(events.next.name == "Socalled")
+      events.next.name should equal("Socalled")
     }
-
   }
 
   private def newEvent = Event(
