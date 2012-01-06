@@ -43,17 +43,30 @@ trait Domain {
 
     def addSessionToEvent(eventId: ObjectId, session: EventSession) {
       val dbObject = sessionToDb(session)
-      mongoDb("events").update(MongoDBObject("_id" -> eventId), $push ("sessions" -> dbObject))
+      mongoDb("events").update(MongoDBObject("_id" -> eventId), $push("sessions" -> dbObject))
     }
 
     def renameByDate(date: DateTime, newName: String) {
-      mongoDb("events").updateMulti(MongoDBObject("sessions.showDateTimeStart" -> date), $set ("name" -> newName))
+      mongoDb("events").updateMulti(MongoDBObject("sessions.showDateTimeStart" -> date), $set("name" -> newName))
+    }
+
+    def findLast10By(town: String, descriptionContains: String) = {
+      val descriptionRegexp = (".*" + descriptionContains + ".*").r
+      val criteria =
+        MongoDBObject("venue.town" -> town, "description" -> descriptionRegexp) ++
+        ("sessions" $exists true) ++
+        ("updated" $exists true)
+
+      mongoDb("events").find(criteria).
+        sort(MongoDBObject("updated" -> -1)).
+        limit(10).
+        map(dbToEvent);
     }
 
     private def eventToDb(event: Event): DBObject = grater[Event].asDBObject(event)
 
     private def dbToEvent(dbObject: DBObject): Event = grater[Event].asObject(dbObject)
-    
+
     private def sessionToDb(session: EventSession): DBObject = grater[EventSession].asDBObject(session)
   }
 

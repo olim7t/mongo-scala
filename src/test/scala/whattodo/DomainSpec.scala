@@ -1,6 +1,5 @@
 package whattodo
 
-import java.lang.Object
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 
@@ -60,7 +59,8 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
     }
   }
 
-  feature("Objects can be updated") {
+
+  feature("Updates can be performed directly in the database") {
 
     scenario("A session is added to an existing event") {
       given("the id of an existing event")
@@ -90,6 +90,19 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
       then("the count of elements with the new name is 99")
       assert(eventRepository.countWithName("NewName") == 99)
     }
+  }
+
+
+  feature("Queries can take multiple criteria") {
+
+    scenario("Jazz events are searched in Paris") {
+      when("searching")
+      val events = eventRepository.findLast10By(town = "Paris", descriptionContains = "jazz")
+
+      then("the first element matches the expected result")
+      assert(events.next.name == "Socalled")
+    }
+
   }
 
   private def newEvent = Event(
