@@ -11,9 +11,8 @@ class MongoClientSpec extends SpecBase with Configuration with MongoClient {
   feature("The application can act as a client of a MongoDB instance") {
 
     scenario("The client connects to the instance and checks that it contains some collections") {
+      when("Connected to the database (performed above)")
 
-      given("The configuration (defined above)")
-      when("Connecting to the database (done above)")
       then("The database contains some collections")
       assert(!mongoDb.collectionNames.isEmpty)
     }

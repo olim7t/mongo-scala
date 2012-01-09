@@ -1,6 +1,6 @@
 import net.liftweb.mongodb.record.field.{BsonRecordListField, BsonRecordField, ObjectIdPk}
 import net.liftweb.mongodb.record.{BsonMetaRecord, BsonRecord, MongoMetaRecord, MongoRecord}
-import net.liftweb.record.field.{IntField, StringField}
+import net.liftweb.record.field.{DateTimeField, IntField, StringField}
 
 class Event private() extends MongoRecord[Event] with ObjectIdPk[Event] {
   def meta = Event
@@ -9,11 +9,24 @@ class Event private() extends MongoRecord[Event] with ObjectIdPk[Event] {
 
   object description extends StringField(this, 2048)
 
+  object sessions extends BsonRecordListField(this, EventSession)
+
   object venue extends BsonRecordField(this, Venue)
+
+  object updated extends DateTimeField(this)
 
 }
 
 object Event extends Event with MongoMetaRecord[Event]
+
+class EventSession private() extends BsonRecord[EventSession] {
+  def meta = EventSession
+
+  object showDateTimeStart extends DateTimeField(this)
+
+}
+
+object EventSession extends EventSession with BsonMetaRecord[EventSession]
 
 class Venue private() extends BsonRecord[Venue] {
   def meta = Venue
@@ -47,9 +60,13 @@ class Station private() extends BsonRecord[Station] {
   object stationType extends StringField(this, 100) {
     override def name = "type"
   }
+
   object ligne extends StringField(this, 100)
+
   object name extends StringField(this, 100)
+
   object distance extends IntField(this)
+
 }
 
 object Station extends Station with BsonMetaRecord[Station]
