@@ -16,7 +16,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
 
     scenario("An event is created") {
       given("a transient event")
-      val transientEvent = newEvent
+      val transientEvent = buildTestEvent
       and("the current number of events")
       val countBeforeSave = eventRepository.count
 
@@ -31,7 +31,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
 
     scenario("An event is searched by id") {
       given("the id of a persisted event")
-      val savedEvent = eventRepository.save(newEvent)
+      val savedEvent = eventRepository.save(buildTestEvent)
       val id = savedEvent._id.getOrElse(fail("saved event should have an id"))
 
       when("looking for the event with this id")
@@ -46,7 +46,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
 
     scenario("An event is removed") {
       given("the id of a persisted event")
-      val savedEvent = eventRepository.save(newEvent)
+      val savedEvent = eventRepository.save(buildTestEvent)
       val id = savedEvent._id.getOrElse(fail("saved event should have an id"))
       and("the current number of events")
       val countBeforeRemove = eventRepository.count
@@ -104,7 +104,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
     }
   }
 
-  private def newEvent = Event(
+  private def buildTestEvent = Event(
     name = "Danse OukaOuka",
     description = "Everybody dancing UkaUka",
     sessions = List(
