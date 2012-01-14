@@ -47,15 +47,17 @@ trait Domain {
     }
 
     def renameByDate(date: DateTime, newName: String) {
-      mongoDb("events").updateMulti(MongoDBObject("sessions.showDateTimeStart" -> date), $set("name" -> newName))
+      val startDate = date.withTime(0, 0, 0, 0)
+      val endDate = startDate.plusDays(1)
+      mongoDb("events").updateMulti(("sessions.showDateTimeStart" $gt startDate $lt endDate), $set("name" -> newName))
     }
 
     def findLast10By(town: String, descriptionContains: String) = {
       val descriptionRegexp = (".*" + descriptionContains + ".*").r
       val criteria =
         MongoDBObject("venue.town" -> town, "description" -> descriptionRegexp) ++
-        ("sessions" $exists true) ++
-        ("updated" $exists true)
+          ("sessions" $exists true) ++
+          ("updated" $exists true)
 
       mongoDb("events").find(criteria).
         sort(MongoDBObject("updated" -> -1)).

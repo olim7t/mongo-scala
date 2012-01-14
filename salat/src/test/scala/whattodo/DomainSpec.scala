@@ -71,7 +71,7 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
         sessions.size
 
       when("a new session is added to this event")
-      eventRepository.addSessionToEvent(eventId, EventSession(new DateTime(2012, 3, 10, 12, 0)))
+      eventRepository.addSessionToEvent(eventId, EventSession(DateTime.parse("2012-03-10T12:00")))
 
       then("its session count is incremented")
       val sessionCountAfter = eventRepository.findById(eventId).
@@ -82,20 +82,22 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
 
     scenario("The name of all the events at a given date is updated") {
       given("A date")
-      val date = new DateTime(2011, 11, 03, 0, 0)
+      val date = DateTime.parse("2011-11-03")
+      and("a new event name")
+      val newName = "NewName"
 
       when("the events with a session at this date are renamed")
-      eventRepository.renameByDate(date, "NewName")
+      eventRepository.renameByDate(date, newName)
 
-      then("the count of elements with the new name is 99")
-      eventRepository.countWithName("NewName") should equal(99)
+      then("the count of elements with the new name is 1061")
+      eventRepository.countWithName(newName) should equal(1061)
     }
   }
 
 
   feature("Queries can use multiple criteria") {
 
-    scenario("Jazz events are searched in Paris") {
+    scenario("Search Jazz events in Paris") {
       when("searching")
       val events = eventRepository.findLast10By(town = "Paris", descriptionContains = "jazz")
 
@@ -108,8 +110,8 @@ class DomainSpec extends SpecBase with Configuration with MongoClient with Domai
     name = "Danse OukaOuka",
     description = "Everybody dancing UkaUka",
     sessions = List(
-      EventSession(new DateTime(2011, 12, 30, 12, 0)),
-      EventSession(new DateTime(2012, 1, 6, 12, 0))),
+      EventSession(DateTime.parse("2011-12-30T12:00")),
+      EventSession(DateTime.parse("2012-01-06T12:00"))),
     venue = Venue("Palais Royal", "22 rue de David Feta", "75001", "Paris"),
     updated = new DateTime())
 }
