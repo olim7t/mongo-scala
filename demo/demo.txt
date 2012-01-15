@@ -1,0 +1,66 @@
+# Casbah
+
+Start MongoDB (with an empty database):
+
+    mongod
+
+Launch an SBT console:
+
+    cd ~/mongo-scala/demo
+    sbt console
+
+Create connection to database:
+
+    import com.mongodb.casbah.Imports._
+    
+    // This line will raise a warning because SLF4J is not configured
+    // correctly, but it does not matter for a console session.
+    val connection = MongoConnection()
+    
+    val db = connection("test")
+
+Create an object and insert it in a collection:
+
+    val s2 = MongoDBObject("brand" -> "Samsung", "model" -> "Galaxy SII", "price" -> 530)
+    db("geektoys").save(s2)
+    
+    // NB: driver has set the id:
+    s2
+
+Open a Mongo console to check the result:
+
+    mongo
+    use test
+    db.geektoys.find()
+
+Insert from Mongo console:
+
+    db.geektoys.save( { brand: "Apple", model: "iPhone 4S", price: NumberInt(630) } )
+
+And check in Scala console (+ show query example):
+
+    db("geektoys").findOne(MongoDBObject("brand" -> "Apple")) // NB: returns an Option
+    
+    val iPhone = db("geektoys").findOne(MongoDBObject("brand" -> "Apple")).get
+
+Access object properties:
+
+    iPhone.get("model")
+    iPhone.get("price")
+
+    // NB: result is not typed (AnyRef). To force conversion:
+    iPhone.as[Int]("price")
+
+    // or:
+    iPhone.getAs[Int]("price")
+    iPhone.getAs[Int]("weight")
+
+Casbah also has a DSL for "fluid querying":
+
+    db("geektoys").findOne("brand" $ne "Apple")
+
+Casbah has a very "dynamic" nature - MongoDBObject is a glorified
+hashmap. To introduce more type safety, we can use case classes over db
+objects:
+
+# Salat

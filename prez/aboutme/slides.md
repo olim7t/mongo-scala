@@ -1,3 +1,5 @@
+!SLIDE center
+# About me
 !SLIDE
     @@@scala
     object OlivierMichallat {
