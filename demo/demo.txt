@@ -59,8 +59,8 @@ Casbah also has a DSL for "fluid querying":
 
     db("geektoys").findOne("brand" $ne "Apple")
 
-Casbah has a very "dynamic" nature - MongoDBObject is a glorified
-hashmap. To introduce more type safety, we can use case classes over db
-objects:
+So far, these examples don't have a very strong typing. To introduce
+more type safety, we can map case classes over db objects:
 
 # Salat
+

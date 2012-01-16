@@ -1,4 +1,4 @@
-name := "handson-salat"
+name := "demo-console"
 
 version := "1.0"
 
@@ -13,3 +13,11 @@ libraryDependencies ++= Seq(
     "org.joda" % "joda-convert" % "1.1",
     "org.scalatest" %% "scalatest" % "1.6.1" % "test"
 )
+
+initialCommands in console := """
+import com.mongodb.casbah.Imports._
+import com.novus.salat._
+import com.novus.salat.global._
+
+import salat._
+"""
