@@ -89,7 +89,7 @@ In the Scala console, we can try deserializing a db object:
 And creating a new class instance and serializing it:
 
     val nexus = GeekToy("Samsung", "Galaxy Nexus", 550)
-    grater[GeekToy].asDbObject(nexus)
+    grater[GeekToy].asDBObject(nexus)
     // NB: we just exercize the serialization mechanism, nothing saved yet
 
 In the example above, we notice that Salat has added a `typeHint` field to the object. This is the default behavior, but in fact the type hint is only necessary when:
@@ -106,7 +106,18 @@ We can change the configuration to use hints only when necessary, by changing `b
 
 Now the previous example doesn't produce an extra property.
 
+With that in place, we can now begin to see how a typical save method could be implemented:
+
+    def save(geekToy: GeekToy) = {
+      val dbo = grater[GeekToy].asDBObject(geekToy)
+      db("geektoys").save(dbo)
+      val newId = dbo.as[ObjectId]("_id")
+      geekToy.copy(_id = Some(newId))
+    }
+
+NB: case classes are immutable, the method returns a new instance with the id set.
+
 TODO:
-* custom save function that returns a copy with id set
-* nested classes?
+* nested classes
+* optional properties
 
