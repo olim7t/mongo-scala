@@ -1,23 +1,28 @@
-# Casbah
+# Setup
 
-Start MongoDB (with an empty database):
+Open a console and start MongoDB (NB: I start with an empty database):
 
     mongod
 
-Launch an SBT console:
+In order to have a preconfigured Scala console, I've created an SBT project (`demo`).
 
-    cd ~/mongo-scala/demo
+Show `demo/build.sbt`.
+At the bottom of the file, I've typed Scala instructions that will be executed everytime the console is launched.
+For the moment, we'll focus on the first 3 ones, that import Casbah types and create a connection to a `test`
+database.
+NB: I've inserted empty comments because SBT doesn't allow blank lines here.
+
+Now launch the SBT console:
+
     sbt console
 
-Create connection to database:
+(NB: SLF4J raises a warning because no appender is configured; for our console session this does not matter)
 
-    import com.mongodb.casbah.Imports._
-    
-    // This line will raise a warning because SLF4J is not configured
-    // correctly, but it does not matter for a console session.
-    val connection = MongoConnection()
-    
-    val db = connection("test")
+If everything is fine, this should return an empty set:
+
+    db.collectionNames
+
+# Casbah
 
 Create an object and insert it in a collection:
 
@@ -26,31 +31,36 @@ Create an object and insert it in a collection:
     
     // NB: driver has set the id:
     s2
+    
+    // And we now have some collections in the database:
+    db.collectionNames
 
-Open a Mongo console to check the result:
+In a new console, open a MongoDB console to check the result:
 
     mongo
     use test
     db.geektoys.find()
 
-Insert from Mongo console:
+We can also go the other way - insert from Mongo console:
 
     db.geektoys.save( { brand: "Apple", model: "iPhone 4S", price: NumberInt(630) } )
 
-And check in Scala console (+ show query example):
+And check in Scala console (btw, this also demonstrates how to perform a query):
 
-    db("geektoys").findOne(MongoDBObject("brand" -> "Apple")) // NB: returns an Option
+    db("geektoys").findOne(MongoDBObject("brand" -> "Apple"))
     
+    // NB: the query returns an Option. In this particular case, we know that the value
+    // is not None, so we can get the object directly:
     val iPhone = db("geektoys").findOne(MongoDBObject("brand" -> "Apple")).get
 
 Access object properties:
 
     iPhone.get("model")
     iPhone.get("price")
-
+    
     // NB: result is not typed (AnyRef). To force conversion:
     iPhone.as[Int]("price")
-
+    
     // or:
     iPhone.getAs[Int]("price")
     iPhone.getAs[Int]("weight")
@@ -59,8 +69,44 @@ Casbah also has a DSL for "fluid querying":
 
     db("geektoys").findOne("brand" $ne "Apple")
 
-So far, these examples don't have a very strong typing. To introduce
-more type safety, we can map case classes over db objects:
+`MongoDBObject` is not very strongly typed (as a matter of fact, it extends `Map[String, AnyRef]`).
+Using a static language like Scala, we probably want to map MongoDB data to our own custom types.
 
 # Salat
+
+Salat maps `DBObject`s to Scala case classes.
+
+Gotchas:
+* Salat won't work with classes defined in the Scala REPL (due to the fact that it uses Scala pickled signatures - type information stored in the bytecode, similar to paranamer).
+* it doesn't work either with classes in the default package.
+
+As a workaround, I've defined the classes in `src/main/scala/examples/SalatModel.scala` (all project classes end up in `sbt console`'s classpath).  (I import the package in the initialization commands).
+
+In the Scala console, we can try deserializing a db object:
+
+    grater[GeekToy].asObject(s2)
+
+And creating a new class instance and serializing it:
+
+    val nexus = GeekToy("Samsung", "Galaxy Nexus", 550)
+    grater[GeekToy].asDbObject(nexus)
+    // NB: we just exercize the serialization mechanism, nothing saved yet
+
+In the example above, we notice that Salat has added a `typeHint` field to the object. This is the default behavior, but in fact the type hint is only necessary when:
+* using subcollections typed to a trait or abstract superclass
+* looking up a `grater` from a `DBObject` (not a type)
+
+We can change the configuration to use hints only when necessary, by changing `build.sbt` like so:
+
+    //import com.novus.salat.global._
+    implicit val ctx = new Context {
+      val name = "Custom Context"
+      override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)
+    }
+
+Now the previous example doesn't produce an extra property.
+
+TODO:
+* custom save function that returns a copy with id set
+* nested classes?
 

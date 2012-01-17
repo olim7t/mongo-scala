@@ -8,16 +8,17 @@ resolvers += "repo.novus snaps" at "http://repo.novus.com/snapshots/"
 
 libraryDependencies ++= Seq(
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",
-    "com.novus" %% "salat-core" % "0.0.8-SNAPSHOT",
-    "joda-time" % "joda-time" % "2.0",
-    "org.joda" % "joda-convert" % "1.1",
-    "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+    "com.novus" %% "salat-core" % "0.0.8-SNAPSHOT"
 )
 
 initialCommands in console := """
 import com.mongodb.casbah.Imports._
+//
+val connection = MongoConnection()
+val db = connection("test")
+//
 import com.novus.salat._
 import com.novus.salat.global._
-
-import salat._
+//
+import examples._
 """
