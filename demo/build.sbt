@@ -10,15 +10,3 @@ libraryDependencies ++= Seq(
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",
     "com.novus" %% "salat-core" % "0.0.8-SNAPSHOT"
 )
-
-initialCommands in console := """
-import com.mongodb.casbah.Imports._
-//
-val connection = MongoConnection()
-val db = connection("test")
-//
-import com.novus.salat._
-import com.novus.salat.global._
-//
-import examples._
-"""

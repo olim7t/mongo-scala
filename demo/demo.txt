@@ -51,7 +51,7 @@ And check in Scala console (btw, this also demonstrates how to perform a query):
     
     // NB: the query returns an Option. In this particular case, we know that the value
     // is not None, so we can get the object directly:
-    val iPhone = db("geektoys").findOne(MongoDBObject("brand" -> "Apple")).get
+    val dbo = db("geektoys").findOne(MongoDBObject("brand" -> "Apple")).get
 
 Access object properties:
 
@@ -106,18 +106,23 @@ We can change the configuration to use hints only when necessary, by changing `b
 
 Now the previous example doesn't produce an extra property.
 
-With that in place, we can now begin to see how a typical save method could be implemented:
+NB: case classes are immutable, which will probably lead to a more functional design
+(show and explain `save` method defined in SalatModel.scala).
 
-    def save(geekToy: GeekToy) = {
-      val dbo = grater[GeekToy].asDBObject(geekToy)
-      db("geektoys").save(dbo)
-      val newId = dbo.as[ObjectId]("_id")
-      geekToy.copy(_id = Some(newId))
-    }
+    val nexus2 = save(nexus)
+    // returns a copy with the id set - nexus2 maps the persisted object
+    
+    // To change the price, make a copy and save it.
+    val nexus3 = nexus2.copy(price = 500)
+    // Since the id is set, MongoDB will update the existing record.
+    save(nexus3)
+    
+    // Show that we have three different objects corresponding to the successive states:
+    nexus
+    nexus2
+    nexus3
 
-NB: case classes are immutable, the method returns a new instance with the id set.
 
 TODO:
-* nested classes
-* optional properties
-
+* nested classes (product reviews)
+* query + map to case class
