@@ -10,5 +10,7 @@ excludeFilter in unmanagedSources := "repl.scala"
 
 libraryDependencies ++= Seq(
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",
-    "com.novus" %% "salat-core" % "0.0.8-SNAPSHOT"
+    "com.novus" %% "salat-core" % "0.0.8-SNAPSHOT",
+    "com.foursquare" %% "rogue" % "1.0.29" intransitive(),
+    "net.liftweb" %% "lift-mongodb-record" % "2.4"
 )

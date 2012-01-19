@@ -2,8 +2,8 @@ import com.mongodb.casbah.Imports._
 
 val connection = MongoConnection()
 val db = connection("test")
-/*
 
+/*
 import com.novus.salat._
 import com.novus.salat.global._
 
@@ -24,4 +24,10 @@ def save(geekToy: GeekToy) = {
       geekToy.copy(_id = Some(newId))
   }
 }
+
+import com.mongodb.Mongo
+import net.liftweb.mongodb.{DefaultMongoIdentifier, MongoDB}
+import com.foursquare.rogue.Rogue._
+
+MongoDB.defineDb(DefaultMongoIdentifier, new Mongo, "test")
 */
