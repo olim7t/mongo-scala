@@ -1,9 +1,11 @@
 # Casbah
 
-In order to have a preconfigured REPL, I've created an SBT project (`demo`).
-Show `demo/build.sbt`: the dependencies listed here, as well as all project classes, are put in the REPL's classpath.
+## Setup connection
 
-To avoid typing everything in the console, I've prepared a `repl.scala` file that I'll uncomment and reload progressively.
+In order to have a preconfigured REPL, I've created an SBT project (`demo`).
+`demo/build.sbt`: the dependencies are listed here, as well as all project classes, are put in the REPL's classpath.
+
+`repl.scala`: I've prepared this to avoid typing everything in the console, I'll uncomment the lines progressively and reload it.
 First 3 lines: import Casbah types and create a connection to a `test` database.
 
     sbt console
@@ -21,7 +23,7 @@ Which fails since MongoDB server is stopped. Do it now (NB: I start with an empt
 
 Now the command returns an empty set.
 
-Create an object and insert it in a collection:
+## Create a first document from Scala
 
     val s2 = MongoDBObject("brand" -> "Samsung", "model" -> "Galaxy SII", "price" -> 530)
     db("geektoys").save(s2)
@@ -32,85 +34,109 @@ Create an object and insert it in a collection:
     // And we now have some collections in the database:
     db.collectionNames
 
-In a new console, open a MongoDB console to check the result:
+## Check the result in Mongo
+
+In a new console:
 
     mongo
     use test
     db.geektoys.find()
 
-We can also go the other way - insert from Mongo console:
+## The other way around: insert from Mongo and load in Scala
+
+In Mongo console:
 
     db.geektoys.save( { brand: "Apple", model: "iPhone 4S", price: NumberInt(630) } )
 
+(NB: in Javascript, numbers are floats by default, we need to explicitely ask for an integer.)
+
 And check in Scala console (btw, this also demonstrates how to perform a query):
 
-    db("geektoys").findOne(MongoDBObject("brand" -> "Apple"))
+    val dbo = db("geektoys").findOne("price" $gt 600).next
+
+## Access object properties:
+
+    dbo.get("model")
+    dbo.get("price")
     
-    // NB: the query returns an Option. In this particular case, we know that the value
-    // is not None, so we can get the object directly:
-    val dbo = db("geektoys").findOne(MongoDBObject("brand" -> "Apple")).get
-
-Access object properties:
-
-    iPhone.get("model")
-    iPhone.get("price")
+    // NB: result is not typed. To force conversion:
+    dbo.as[String]("model")
+    dbo.as[Int]("price")
     
-    // NB: result is not typed (AnyRef). To force conversion:
-    iPhone.as[Int]("price")
+    // of course we get a failure if we specify the wrong type:
+    dbo.as[String]("price")
     
-    // or:
-    iPhone.getAs[Int]("price")
-    iPhone.getAs[Int]("weight")
+    // and also with a property name that does not exist:
+    dbo.as[String]("color")
+    
+    // however, we can handle optional properties:
+    dbo.getAs[String]("model")
+    dbo.getAs[String]("color")
 
-Casbah also has a DSL for "fluid querying":
+In Scala, we'll probably want stronger typing, by mapping the documents to some Scala types.
 
-    db("geektoys").findOne("brand" $ne "Apple")
-
-`MongoDBObject` is not very strongly typed (as a matter of fact, it extends `Map[String, AnyRef]`).
-Using a static language like Scala, we probably want to map MongoDB data to our own custom types.
+The first option is to map to case classes, using Salat.
 
 # Salat
 
-Salat maps `DBObject`s to Scala case classes.
+## The model
 
 Gotchas:
-* Salat won't work with classes defined in the Scala REPL (due to the fact that it uses Scala pickled signatures - type information stored in the bytecode, similar to paranamer).
-* it doesn't work either with classes in the default package.
 
-As a workaround, I've defined the classes in `src/main/scala/examples/SalatModel.scala` (all project classes end up in `sbt console`'s classpath).  (I import the package in the initialization commands).
+* Salat won't work with classes defined in the Scala REPL (due to the fact that it uses Scala pickled signatures - type information stored in the bytecode to avoid the cost of reflexion,
+  somewhat similar to paranamer).
+* it doesn't work with the default package either.
 
-In the Scala console, we can try deserializing a db object:
+As a workaround, I've defined the classes in a source file in my project.
 
-    grater[GeekToy].asObject(s2)
+[`SalatModel.scala`] show and explain class structure, in particular `Option` and default value for `_id` (ignore commented parts for now).
+
+[`repl.scala`] uncomment Salat and model classes import.
+
+## From DB objects to case classes
+
+[repl] try mapping the object that we previously loaded from the database:
+
+    :l repl.scala
+    
+    dbo
+    val iphone = grater[GeekToy].asObject(dbo)
+    iphone.brand
+    iphone.price
 
 And creating a new class instance and serializing it:
 
-    val nexus = GeekToy("Samsung", "Galaxy Nexus", 550)
-    grater[GeekToy].asDBObject(nexus)
-    // NB: we just exercize the serialization mechanism, nothing saved yet
+    val nexus = GeekToy("Samsung", "Galaxy Nexus", 600)
+    // NB: having _id with a default value is handy to create not-yet persisted instances
 
-In the example above, we notice that Salat has added a `typeHint` field to the object. This is the default behavior, but in fact the type hint is only necessary when:
+## From case classes to DB objects
+
+Now try to go the other way - case class to DB object:
+
+    grater[GeekToy].asDBObject(nexus)
+
+Before we save the object to the database, there is a small detail we need to fix.
+
+*Q*: do you notice anything in particular in the output?
+*A*: Salat has added a `typeHint` field to the object. This is the default behavior, but in fact the type hint is only necessary when:
 * using subcollections typed to a trait or abstract superclass
 * looking up a `grater` from a `DBObject` (not a type)
 
-We can change the configuration to use hints only when necessary, by changing `build.sbt` like so:
+We will change the configuration to use hints only when necessary.
 
-    //import com.novus.salat.global._
-    implicit val ctx = new Context {
-      val name = "Custom Context"
-      override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)
-    }
+[`repl.scala`] comment `salat.global._` import and uncomment custom context.
 
-Now the previous example doesn't produce an extra property.
+Now the previous example doesn't produce an extra property. Let's save the object.
 
-NB: case classes are immutable, which will probably lead to a more functional design
-(show and explain `save` method defined in SalatModel.scala).
+## Saving
+
+[`repl.scala`] uncomment `save` method and explain it. NB: case classes are immutable, which will probably lead to a more functional design
 
     val nexus2 = save(nexus)
     // returns a copy with the id set - nexus2 maps the persisted object
     
     // To change the price, make a copy and save it.
-    val nexus3 = nexus2.copy(price = 500)
+    val nexus3 = nexus2.copy(price = 550)
     // Since the id is set, MongoDB will update the existing record.
     save(nexus3)
     
@@ -119,7 +145,30 @@ NB: case classes are immutable, which will probably lead to a more functional de
     nexus2
     nexus3
 
+## Subdocuments
 
-TODO:
-* nested classes (product reviews)
-* query + map to case class
+[`SalatModel.scala`] uncomment reviews property and corresponding case class.
+
+[repl]
+
+    :q
+    sbt console
+    :l repl.scala
+    val ipad = val ipad = GeekToy("Apple", "iPad 3", 800, List(Review("Olivier", "Will it blend?")))
+    save(ipad)
+
+Check in Mongo => OK
+
+## Mapping query results
+
+To conclude, we'll load all the objects created so far and convert them to case classes:
+
+    db("geektoys").find().toSeq.map(grater[GeekToy].asObject(_)).mkString("\n")
+
+But this fails.
+
+*Q*: do you see why?
+*A*: we have some documents without a `reviews` property in the database.
+
+[`SalatModel.scala`] add a default value of `List()` for `reviews` (I also tried changing the type to `Option[List[Review]]`, but then Salat would deserialize to plain DB objects).
+

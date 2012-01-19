@@ -2,13 +2,19 @@ import com.mongodb.casbah.Imports._
 
 val connection = MongoConnection()
 val db = connection("test")
+/*
 
 import com.novus.salat._
 import com.novus.salat.global._
 
 import examples._
 
-def save(geekToy: GeekToy, db: MongoDB) = {
+implicit val ctx = new Context {
+  val name = "Custom Context"
+  override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)
+}
+
+def save(geekToy: GeekToy) = {
   val dbo = grater[GeekToy].asDBObject(geekToy)
   db("geektoys").save(dbo, WriteConcern.Safe)
   geekToy._id match {
@@ -18,3 +24,4 @@ def save(geekToy: GeekToy, db: MongoDB) = {
       geekToy.copy(_id = Some(newId))
   }
 }
+*/
