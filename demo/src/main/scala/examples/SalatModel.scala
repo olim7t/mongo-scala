@@ -6,7 +6,7 @@ case class GeekToy(
   brand: String,
   model: String,
   price: Int,
-//  reviews: Option[List[Review]],
+//  reviews: List[Review],
   _id: Option[ObjectId] = None
 )
 

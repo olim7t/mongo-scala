@@ -6,6 +6,8 @@ scalaVersion := "2.9.1"
 
 resolvers += "repo.novus snaps" at "http://repo.novus.com/snapshots/"
 
+excludeFilter in unmanagedSources := "repl.scala"
+
 libraryDependencies ++= Seq(
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",
     "com.novus" %% "salat-core" % "0.0.8-SNAPSHOT"

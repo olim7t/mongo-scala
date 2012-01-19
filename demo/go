@@ -1,0 +1,13 @@
+#!/bin/sh
+# Open all relevant files in MacVim
+mvim
+
+# Wait for Vim server to start
+while [[ `/Applications/MacVim.app/Contents/MacOS/Vim --serverlist` != "VIM" ]] ; do
+  :
+done
+
+mvim build.sbt
+mvim repl.scala
+mvim src/main/scala/examples/SalatModel.scala
+

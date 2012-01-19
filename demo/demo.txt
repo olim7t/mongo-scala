@@ -1,28 +1,25 @@
-# Setup
+# Casbah
 
-Open a console and start MongoDB (NB: I start with an empty database):
+In order to have a preconfigured REPL, I've created an SBT project (`demo`).
+Show `demo/build.sbt`: the dependencies listed here, as well as all project classes, are put in the REPL's classpath.
 
-    mongod
-
-In order to have a preconfigured Scala console, I've created an SBT project (`demo`).
-
-Show `demo/build.sbt`.
-At the bottom of the file, I've typed Scala instructions that will be executed everytime the console is launched.
-For the moment, we'll focus on the first 3 ones, that import Casbah types and create a connection to a `test`
-database.
-NB: I've inserted empty comments because SBT doesn't allow blank lines here.
-
-Now launch the SBT console:
+To avoid typing everything in the console, I've prepared a `repl.scala` file that I'll uncomment and reload progressively.
+First 3 lines: import Casbah types and create a connection to a `test` database.
 
     sbt console
+    :l repl.scala
 
 (NB: SLF4J raises a warning because no appender is configured; for our console session this does not matter)
 
-If everything is fine, this should return an empty set:
+Try to access the database:
 
     db.collectionNames
 
-# Casbah
+Which fails since MongoDB server is stopped. Do it now (NB: I start with an empty database):
+
+    mongod
+
+Now the command returns an empty set.
 
 Create an object and insert it in a collection:
 
