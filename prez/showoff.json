@@ -2,8 +2,6 @@
   "name": "Mongo-Scala",
   "description": "MongoDB client libraries in Scala",
   "sections": [
-    {"section":"title"},
-    {"section":"aboutme"},
-    {"section":"content"}
+    {"section":"slides"}
   ]
 }

@@ -1,7 +1,27 @@
+!SLIDE center
+
+![MongoDB](mongodb.png)
+#+#
+![Scala](scala.png)
+
+!SLIDE
+    @@@scala
+    object OlivierMichallat {
+
+      val company = "Xebia"
+
+      val blog = "blog.xebia.fr" +
+                 "/author/omichallat"
+
+      val twitter = "@olim7t"
+
+      val github = "github.com/olim7t"
+    }
+
 !SLIDE incremental center
 ![menu](special.jpg)
 
-* various options to access MongoDB from Scala
+* showcase various options to access MongoDB from Scala
 * live coding
 * more material available at [github.com/olim7t/mongo-scala](http://github.com/olim7t/mongo-scala)
 
@@ -34,3 +54,7 @@
 ![layers](layers5.png)
 
 **Rogue**: type-safe query DSL
+
+!SLIDE center
+#Demo
+
