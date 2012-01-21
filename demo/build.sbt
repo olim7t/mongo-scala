@@ -7,7 +7,9 @@ scalaVersion := "2.9.1"
 resolvers += "repo.novus snaps" at "http://repo.novus.com/snapshots/"
 
 excludeFilter in unmanagedSources := new sbt.FileFilter {
-  def accept(f: File) = f.getName()(0).isLowerCase
+  def accept(f: File) = {
+    Seq("casbah.scala", "salat.scala", "lift.scala").contains(f.getName)
+  }
 }
 
 libraryDependencies ++= Seq(
