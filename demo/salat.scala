@@ -3,12 +3,12 @@ import com.mongodb.casbah.Imports._
 val connection = MongoConnection()
 val db = connection("test")
 
-/*
 import com.novus.salat._
 import com.novus.salat.global._
 
 import examples.salat._
 
+/*
 implicit val ctx = new Context {
   val name = "Custom Context"
   override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)

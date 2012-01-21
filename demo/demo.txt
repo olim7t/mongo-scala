@@ -5,24 +5,24 @@
 In order to have a preconfigured REPL, I've created an SBT project (`demo`).
 `demo/build.sbt`: the dependencies are listed here, as well as all project classes, are put in the REPL's classpath.
 
-`salat.scala`: I've prepared this to avoid typing everything in the console, I'll uncomment the lines progressively and reload it.
+`casbah.scala`: I've prepared this to avoid typing everything in the console, I'll uncomment the lines progressively and reload it.
 First 3 lines: import Casbah types and create a connection to a `test` database.
 
     sbt
     console
-    :l salat.scala
+    :l casbah.scala
 
 (NB: SLF4J raises a warning because no appender is configured; for our console session this does not matter)
 
-Try to access the database:
+NB: the connection has not been established yet, only when we first do something with the database.
 
-    db.collectionNames
-
-Which fails since MongoDB server is stopped. Do it now (NB: I start with an empty database):
+Start MongoDB daemon:
 
     mongod
 
-Now the command returns an empty set.
+From the REPl, find the available collections (returns an empty set):
+
+    db.collectionNames
 
 ## Create a first document from Scala
 
@@ -48,12 +48,13 @@ In a new console:
 In Mongo console:
 
     db.geektoys.save( { brand: "Apple", model: "iPhone 4S", price: NumberInt(630) } )
+    db.geektoys.find()
 
 (NB: in Javascript, numbers are floats by default, we need to explicitely ask for an integer.)
 
 And check in Scala console (btw, this also demonstrates how to perform a query):
 
-    val dbo = db("geektoys").findOne("price" $gt 600).next
+    val dbo = db("geektoys").find("price" $gt 600).next
 
 ## Access object properties:
 
@@ -74,6 +75,11 @@ And check in Scala console (btw, this also demonstrates how to perform a query):
     dbo.getAs[String]("model")
     dbo.getAs[String]("color")
 
+DB objects are actually maps:
+
+    // Since I got this from a request, it's not wrapped in a MongoDBObject
+    dbo.asInstanceOf[java.util.Map[String, Object]]
+
 In Scala, we'll probably want stronger typing, by mapping the documents to some Scala types.
 
 The first option is to map to case classes, using Salat.
@@ -84,8 +90,8 @@ The first option is to map to case classes, using Salat.
 
 Gotchas:
 
-* Salat won't work with classes defined in the Scala REPL (due to the fact that it uses Scala pickled signatures - type information stored in the bytecode to avoid the cost of reflexion,
-  somewhat similar to paranamer).
+* Salat won't work with classes defined in the Scala REPL (due to the fact that it uses Scala pickled signatures - type information stored in
+  the bytecode to avoid the cost of reflexion, somewhat similar to paranamer).
 * it doesn't work with the default package either.
 
 As a workaround, I've defined the classes in a source file in my project.
