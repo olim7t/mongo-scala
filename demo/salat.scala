@@ -7,7 +7,7 @@ val db = connection("test")
 import com.novus.salat._
 import com.novus.salat.global._
 
-import examples._
+import examples.salat._
 
 implicit val ctx = new Context {
   val name = "Custom Context"
@@ -24,10 +24,4 @@ def save(geekToy: GeekToy) = {
       geekToy.copy(_id = Some(newId))
   }
 }
-
-import com.mongodb.Mongo
-import net.liftweb.mongodb.{DefaultMongoIdentifier, MongoDB}
-import com.foursquare.rogue.Rogue._
-
-MongoDB.defineDb(DefaultMongoIdentifier, new Mongo, "test")
 */

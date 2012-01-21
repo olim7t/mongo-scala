@@ -6,7 +6,9 @@ scalaVersion := "2.9.1"
 
 resolvers += "repo.novus snaps" at "http://repo.novus.com/snapshots/"
 
-excludeFilter in unmanagedSources := "repl.scala"
+excludeFilter in unmanagedSources := new sbt.FileFilter {
+  def accept(f: File) = Seq("salat.scala", "lift.scala").contains(f.getName)
+}
 
 libraryDependencies ++= Seq(
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",

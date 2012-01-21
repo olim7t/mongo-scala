@@ -8,6 +8,8 @@ while [[ `/Applications/MacVim.app/Contents/MacOS/Vim --serverlist` != "VIM" ]] 
 done
 
 mvim build.sbt
-mvim repl.scala
-mvim src/main/scala/examples/SalatModel.scala
+mvim salat.scala
+mvim src/main/scala/SalatModel.scala
+mvim lift.scala
+mvim src/main/scala/LiftModel.scala
 

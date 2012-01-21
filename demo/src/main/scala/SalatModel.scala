@@ -1,4 +1,4 @@
-package examples
+package examples.salat
 
 import org.bson.types.ObjectId
 
@@ -12,7 +12,7 @@ case class GeekToy(
 
 /*
 case class Review(
-  name: String,
+  author: String,
   comment: String
 )
 */
