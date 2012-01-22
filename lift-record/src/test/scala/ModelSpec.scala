@@ -1,12 +1,9 @@
 import collection.immutable.List
 import com.foursquare.rogue.Rogue._
-import java.util.{Date, GregorianCalendar, Calendar}
-import net.liftweb.common.{Box, Failure, Empty, Full}
-import net.liftweb.mongodb.record.MongoRecord
-import net.liftweb.record.Field
+import java.util.{GregorianCalendar, Calendar}
+import net.liftweb.common.{Failure, Empty, Full}
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
-import java.util.regex.Pattern
 
 
 class ModelSpec extends SpecBase {
@@ -66,7 +63,7 @@ class ModelSpec extends SpecBase {
       val sessionCountBefore = countSessions(eventId = id)
 
       when("a new session is added to this event")
-      Event where (_.id eqs id) modify (_.sessions push newTestSession) updateOne()
+      Event.addSession(id, newTestSession)
 
       then("its session count is incremented")
       val sessionCountAfter = countSessions(eventId = id)
@@ -75,13 +72,12 @@ class ModelSpec extends SpecBase {
 
     scenario("The name of all the events at a given date is updated") {
       given("A date")
-      val startDate = DateTime.parse("2011-11-03")
-      val endDate = startDate.plusDays(1)
+      val date = DateTime.parse("2011-11-03")
       and("a new event name")
       val newName = "NewName2"
 
       when("the events with a session at this date are renamed")
-      Event where (_.sessions.subfield(_.showDateTimeStart) between(startDate, endDate)) modify (_.name setTo newName) updateMulti()
+      Event.renameByDate(date, newName)
 
       then("the count of elements with the new name is 1061")
       Event where (_.name eqs newName) count() should equal(1061)
@@ -92,7 +88,7 @@ class ModelSpec extends SpecBase {
 
     scenario("Search Jazz events in Paris") {
       when("searching")
-      val events = Event where (_.venue.subfield(_.town) eqs "Paris") and (_.description matches Pattern.compile(".*jazz.*")) limit(10) orderDesc (_.updated) fetch()
+      val events = Event.findLast10By(town = "Paris", descriptionContains="jazz")
 
       then("the first element matches the expected result")
       events.size should equal(10)

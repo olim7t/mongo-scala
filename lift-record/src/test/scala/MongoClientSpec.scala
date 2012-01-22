@@ -18,4 +18,5 @@ class MongoClientSpec extends SpecBase {
   }
 
   def defaultDb = MongoDB.getDb(DefaultMongoIdentifier).getOrElse(fail("A database should be defined for the default identifier"))
+  // NB the database is set up in class `Boot`
 }
