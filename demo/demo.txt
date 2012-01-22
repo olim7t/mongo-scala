@@ -91,7 +91,7 @@ The first option is to map to case classes, using Salat.
 Gotchas:
 
 * Salat won't work with classes defined in the Scala REPL (due to the fact that it uses ScalaSig pickled signatures - type information stored
-  in the bytecode to avoid the cost of reflexion, somewhat similar to paranamer).
+  in the bytecode to avoid the cost of reflexion, somewhat similar to paranamer) => won't work with the Cake pattern either
 * it doesn't work with the default package either.
 
 As a workaround, I've defined the classes in a source file in my project.
