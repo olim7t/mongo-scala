@@ -11,7 +11,7 @@ Here's what you'll find in the subdirectories:
 ## Workshop setup
 
 ### Software
-The bare minimum is [MongoDB](http://www.mongodb.org/downloads)(duh!), a Java VM, and [SBT](https://github.com/harrah/xsbt/wiki/Getting-Started-Setup).
+The bare minimum is [MongoDB](http://www.mongodb.org/downloads) (duh!), a Java VM, and [SBT](https://github.com/harrah/xsbt/wiki/Getting-Started-Setup).
 
 ### Install the test database
 * start your MongoDB daemon (`mongod`);
