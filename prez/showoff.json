@@ -1,0 +1,7 @@
+{
+  "name": "Mongo-Scala",
+  "description": "MongoDB client libraries in Scala",
+  "sections": [
+    {"section":"slides"}
+  ]
+}
