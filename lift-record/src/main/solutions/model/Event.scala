@@ -2,7 +2,9 @@ import net.liftweb.mongodb.record.field.{BsonRecordListField, BsonRecordField, O
 import net.liftweb.mongodb.record.{BsonMetaRecord, BsonRecord, MongoMetaRecord, MongoRecord}
 import net.liftweb.record.field.{DateTimeField, IntField, StringField}
 import org.bson.types.ObjectId
+import com.foursquare.rogue.Rogue._
 import org.joda.time.DateTime
+import java.util.regex.Pattern
 
 
 class Event private() extends MongoRecord[Event] with ObjectIdPk[Event] {
@@ -22,26 +24,17 @@ class Event private() extends MongoRecord[Event] with ObjectIdPk[Event] {
 
 object Event extends Event with MongoMetaRecord[Event] {
   def addSession(eventId: ObjectId, newSession: EventSession) {
-    // TODO perform an update query with Rogue (the operation must be atomic, don't do a load followed by a save)
-    // See https://github.com/foursquare/rogue
-    // and a lot of query examples here:
-    // https://github.com/foursquare/rogue/blob/master/src/test/scala/com/foursquare/rogue/QueryTest.scala
-    throw new AssertionError("TODO")
+    Event where (_.id eqs eventId) modify (_.sessions push newSession) updateOne()
   }
 
   def renameByDate(date: DateTime, newName: String) {
-    // select any hour of this day
     val startDate = date.withTime(0, 0, 0, 0)
     val endDate = startDate.plusDays(1)
-
-    // TODO perform a range query on sessions.showDateTimeStart (use the subfield() method)
-    throw new AssertionError("TODO")
+    Event where (_.sessions.subfield(_.showDateTimeStart) between(startDate, endDate)) modify (_.name setTo newName) updateMulti()
   }
 
   def findLast10By(town: String, descriptionContains: String) = {
-    // TODO use a regexp for the description (Rogue uses java.util.regex.Pattern)
-    // dont' forget to sort by date descending
-    throw new AssertionError("TODO")
+    Event where (_.venue.subfield(_.town) eqs town) and (_.description matches Pattern.compile(".*" + descriptionContains + ".*")) limit (10) orderDesc (_.updated) fetch()
   }
 }
 

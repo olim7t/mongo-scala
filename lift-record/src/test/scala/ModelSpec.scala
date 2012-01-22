@@ -9,6 +9,8 @@ import org.joda.time.DateTime
 class ModelSpec extends SpecBase {
   feature("Objects can be created, searched and removed") {
 
+    // NB: there is nothing to change for the first 3 scenarios, Lift Record gives us these methods for free
+
     scenario("An event is created") {
       given("a new event")
       val event: Event = newTestEvent
