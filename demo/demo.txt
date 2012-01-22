@@ -200,16 +200,29 @@ Access values:
     // returns a custom type. to get to the actual value:
     val price: Int = ipad.price.is
 
+Record handles missing properties (sets default values):
+
+    db.geektoys.save( { "brand": "Dell" } )
+
+    val dell = (GeekToy where (_.brand eqs "Dell") fetch).head
+    dell.model.is
+    dell.price.is
+
 Records are well integrated in Lift's ecosystem (support for validation, generating forms, integration in wizards, etc.).
 
 ## Create and save a record
 
-    val kindle = GeekToy.createRecord.brand("Amazon").model("Kindle").price(100)
+    val kindle = GeekToy.createRecord.
+      brand("Amazon").
+      model("Kindle").
+      price(100)
     kindle.save
 
 ## Modify a record (objects are mutable)
 
-    val kindleReview = Review.createRecord.author("Olivier").comment("I love it")
+    val kindleReview = Review.createRecord.
+      author("Olivier").
+      comment("Great")
     kindle.reviews.set(List(kindleReview))
     kindle.save
 
@@ -230,6 +243,8 @@ Rogue allows us to do this:
 
 More elaborate queries:
 
-    GeekToy where (_.subfield(_.author) eqs "Olivier") fetch
+    GeekToy where (_.reviews.subfield(_.author) eqs "Olivier") fetch
+    // AFAIK, this only works for one level of subfield
     
     GeekToy where (_.brand eqs "Apple") modify (_.price setTo 400) updateMulti
+
