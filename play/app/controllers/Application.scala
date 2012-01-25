@@ -4,10 +4,15 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import models.GeekToyRepository
 
 import views._
 
 object Application extends Controller {
+  def index = Action {
+    Ok(html.list(GeekToyRepository.all))
+  }
+
 
   /**
    * Describes the hello form.
@@ -19,15 +24,6 @@ object Application extends Controller {
       "color" -> optional(text)
     )
   )
-
-  // -- Actions
-
-  /**
-   * Home page
-   */
-  def index = Action {
-    Ok(html.index(helloForm))
-  }
 
   /**
    * Handles the form submission.
