@@ -14,14 +14,14 @@ implicit val ctx = new Context {
   override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)
 }
 
-def save(geekToy: GeekToy) = {
-  val dbo = grater[GeekToy].asDBObject(geekToy)
-  db("geektoys").save(dbo, WriteConcern.Safe)
-  geekToy._id match {
-    case Some(_) => geekToy
+def save(product: Product) = {
+  val dbo = grater[Product].asDBObject(product)
+  db("products").save(dbo, WriteConcern.Safe)
+  product._id match {
+    case Some(_) => product
     case None =>
       val newId = dbo.as[ObjectId]("_id")
-      geekToy.copy(_id = Some(newId))
+      product.copy(_id = Some(newId))
   }
 }
 */

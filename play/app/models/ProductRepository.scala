@@ -7,7 +7,7 @@ import com.mongodb.casbah.{MongoConnection, MongoDB}
 import com.novus.salat._
 import com.novus.salat.global._
 
-case class GeekToy(
+case class Product(
   brand: String,
   model: String,
   price: Int,
@@ -20,25 +20,25 @@ case class Review(
   comment: String
 )
 
-object GeekToyRepository {
-  private val geekToys = MongoConnection()("test")("geektoys")
+object ProductRepository {
+  private val products = MongoConnection()("test")("products")
 
-  def all: Seq[GeekToy] = geekToys.find().map(fromDb).toSeq
+  def all: Seq[Product] = products.find().map(fromDb).toSeq
 
-  def byId(id: ObjectId): Option[GeekToy] = geekToys.findOneByID(id).map(fromDb)
+  def byId(id: ObjectId): Option[Product] = products.findOneByID(id).map(fromDb)
 
-  def save(geekToy: GeekToy) = {
-    val dbo = toDb(geekToy)
-    geekToys.save(dbo, WriteConcern.Safe)
-    geekToy._id match {
-      case Some(_) => geekToy
+  def save(product: Product) = {
+    val dbo = toDb(product)
+    products.save(dbo, WriteConcern.Safe)
+    product._id match {
+      case Some(_) => product
       case None =>
         val newId = dbo.as[ObjectId]("_id")
-        geekToy.copy(_id = Some(newId))
+        product.copy(_id = Some(newId))
     }
   }
 
-  def removeById(id: ObjectId) = geekToys.remove(MongoDBObject("_id" -> id))
+  def removeById(id: ObjectId) = products.remove(MongoDBObject("_id" -> id))
 
   // Customize Salat context
   implicit val ctx = new Context {
@@ -46,6 +46,6 @@ object GeekToyRepository {
     override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)
   }
 
-  private def fromDb(dbObject: DBObject): GeekToy = grater[GeekToy].asObject(dbObject)
-  private def toDb(geekToy: GeekToy): DBObject = grater[GeekToy].asDBObject(geekToy)
+  private def fromDb(dbObject: DBObject): Product = grater[Product].asObject(dbObject)
+  private def toDb(product: Product): DBObject = grater[Product].asDBObject(product)
 }

@@ -27,7 +27,7 @@ From the REPl, find the available collections (returns an empty set):
 ## Create a first document from Scala
 
     val s2 = MongoDBObject("brand" -> "Samsung", "model" -> "Galaxy SII", "price" -> 530)
-    db("geektoys").save(s2)
+    db("products").save(s2)
     
     // NB: driver has set the id:
     s2
@@ -41,20 +41,20 @@ In a new console:
 
     mongo
     use test
-    db.geektoys.find()
+    db.products.find()
 
 ## The other way around: insert from Mongo and load in Scala
 
 In Mongo console:
 
-    db.geektoys.save( { brand: "Apple", model: "iPhone 4S", price: NumberInt(630) } )
-    db.geektoys.find()
+    db.products.save( { brand: "Apple", model: "iPhone 4S", price: NumberInt(630) } )
+    db.products.find()
 
 (NB: in Javascript, numbers are floats by default, we need to explicitely ask for an integer.)
 
 And check in Scala console (btw, this also demonstrates how to perform a query):
 
-    val dbo = db("geektoys").find("price" $gt 600).next
+    val dbo = db("products").find("price" $gt 600).next
 
 ## Access object properties:
 
@@ -104,8 +104,8 @@ As a workaround, I've defined the classes in a source file in my project.
 
     :l salat.scala
     
-    val dbo = db("geektoys").find("price" $gt 600).next
-    val iphone = grater[GeekToy].asObject(dbo)
+    val dbo = db("products").find("price" $gt 600).next
+    val iphone = grater[Product].asObject(dbo)
     iphone.brand
     iphone.price
 
@@ -113,10 +113,10 @@ As a workaround, I've defined the classes in a source file in my project.
 
 Now try to go the other way - case class to DB object:
 
-    val nexus = GeekToy("Samsung", "Galaxy Nexus", 600)
+    val nexus = Product("Samsung", "Galaxy Nexus", 600)
     // NB: having _id with a default value is handy to create not-yet persisted instances
     
-    grater[GeekToy].asDBObject(nexus)
+    grater[Product].asDBObject(nexus)
 
 Before we save the object to the database, there is a small detail we need to fix.
 
@@ -157,7 +157,7 @@ Now the previous example doesn't produce an extra property. Let's save the objec
     :q
     console
     :l salat.scala
-    val ipad = GeekToy("Apple", "iPad 3", 800, List(Review("Olivier", "Will it blend?")))
+    val ipad = Product("Apple", "iPad 3", 800, List(Review("Olivier", "Will it blend?")))
     save(ipad)
 
 Check in Mongo => OK
@@ -166,7 +166,7 @@ Check in Mongo => OK
 
 To conclude, we'll load all the objects created so far and convert them to case classes:
 
-    db("geektoys").find().toSeq.map(grater[GeekToy].asObject(_)).mkString("\n")
+    db("products").find().toSeq.map(grater[Product].asObject(_)).mkString("\n")
 
 But this fails.
 
@@ -192,7 +192,7 @@ But this fails.
     :q
     console
     :l lift.scala
-    val ipad = GeekToy.findAll("model" -> "iPad 3").head
+    val ipad = Product.findAll("model" -> "iPad 3").head
 
 Access values:
 
@@ -202,9 +202,9 @@ Access values:
 
 Record handles missing properties (sets default values):
 
-    db.geektoys.save( { "brand": "Dell" } )
+    db.products.save( { "brand": "Dell" } )
 
-    val dell = (GeekToy where (_.brand eqs "Dell") fetch).head
+    val dell = (Product where (_.brand eqs "Dell") fetch).head
     dell.model.is
     dell.price.is
 
@@ -212,7 +212,7 @@ Records are well integrated in Lift's ecosystem (support for validation, generat
 
 ## Create and save a record
 
-    val kindle = GeekToy.createRecord.
+    val kindle = Product.createRecord.
       brand("Amazon").
       model("Kindle").
       price(100)
@@ -230,21 +230,21 @@ Records are well integrated in Lift's ecosystem (support for validation, generat
 
 Until now, all of our requests were not type safe:
 
-    GeekToy.findAll("model" -> "Kindle")
+    Product.findAll("model" -> "Kindle")
     // if there is a mistake on a field name, we simply get no results:
-    GeekToy.findAll("name" -> "Kindle")
+    Product.findAll("name" -> "Kindle")
 
 Rogue allows us to do this:
 
-    GeekToy where (_.model eqs "Kindle") fetch
+    Product where (_.model eqs "Kindle") fetch
 
     // this time if we make a mistake we get a compile error
-    GeekToy where (_.name eqs "Kindle") fetch
+    Product where (_.name eqs "Kindle") fetch
 
 More elaborate queries:
 
-    GeekToy where (_.reviews.subfield(_.author) eqs "Olivier") fetch
+    Product where (_.reviews.subfield(_.author) eqs "Olivier") fetch
     // AFAIK, this only works for one level of subfield
     
-    GeekToy where (_.brand eqs "Apple") modify (_.price setTo 400) updateMulti
+    Product where (_.brand eqs "Apple") modify (_.price setTo 400) updateMulti
 

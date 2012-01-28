@@ -2,7 +2,7 @@ package examples.salat
 
 import org.bson.types.ObjectId
 
-case class GeekToy(
+case class Product(
   brand: String,
   model: String,
   price: Int,

@@ -4,13 +4,13 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
-import models.GeekToyRepository
+import models.ProductRepository
 
 import views._
 
 object Application extends Controller {
   def index = Action {
-    Ok(html.list(GeekToyRepository.all))
+    Ok(html.list(ProductRepository.all))
   }
 
 
