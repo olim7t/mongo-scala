@@ -4,7 +4,7 @@ This is the material for a workshop I'm giving at [Xebia FR](http://www.xebia.fr
 
 Here's what you'll find in the subdirectories:
 
-* `prez`: my 1-hour presentation (made with the awesome [ShowOff](https://github.com/schacon/showoff)). There are few slides, as I will spend most of the time demonstrating stuff in the Scala REPL ; a tentative script of what I'll say is available in `demo/demo.md`.
+* `prez`: my 1-hour presentation (made with the awesome [ShowOff](https://github.com/schacon/showoff)). There are few slides, as I will spend most of the time demonstrating stuff in the Scala REPL ; a tentative script of what I'll say is available in `demo/demo.html`.
 * `demo`: the SBT project of my demonstration. Used to get a REPL with the relevant libs in my classpath, and to prepare stuff that I consider too boring/too long to type live.
 * `salat` and `lift-record`: two workshops with various exercises. These are not part of my presentation, but provided to give an opportunity to practice from home.
 
