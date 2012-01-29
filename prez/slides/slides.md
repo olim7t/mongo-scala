@@ -187,7 +187,7 @@ Boiler-plate free data classes.
     <th>Lift-record + Rogue</th>
   </tr>
   <tr>
-    <td>Map to standard Scala case classes</td>
+    <td>Map to standard Scala case classes (more functional)</td>
     <td>Extend Lift-specific types</td>
   </tr>
   <tr>
