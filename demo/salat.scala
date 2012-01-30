@@ -13,6 +13,7 @@ implicit val ctx = new Context {
   val name = "Custom Context"
   override val typeHintStrategy = StringTypeHintStrategy(when = TypeHintFrequency.WhenNecessary)
 }
+*/
 
 def save(product: Product) = {
   val dbo = grater[Product].asDBObject(product)
@@ -24,4 +25,3 @@ def save(product: Product) = {
       product.copy(_id = Some(newId))
   }
 }
-*/

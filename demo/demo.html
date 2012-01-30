@@ -146,6 +146,9 @@ examples.
 "_id" is optional, gets a default value of None for objects
 that haven't been saved yet
 
+also contains an additional 'reviews' property that contains
+a list of nested documents.
+
 NB: Salat doesn't work when defining the classes directly
 in the REPL. It uses ScalaSig aka "pickled signature" -
 type information that is encoded in the compiled classes.
@@ -159,13 +162,33 @@ type information that is encoded in the compiled classes.
 val dbo = db("products").find("price" $gt 600).next
 
 val iphone = grater[Product].asObject(dbo)
+// which FAILS...
+// since property 'reviews' is not defined in the documents
+// we've created so far (show error message).
+    </pre>
+
+    Salat does not automatically handle missing properties. In this case, we can solve the problem by specifying a default value:
+    <pre class="vim">
+[SalatModel.scala]
+// add default value:
+  reviews: List[Review] = List(),
+    </pre>
+
+    <pre class="scala">
+:q
+console
+:l salat.scala
+val dbo = db("products").find("price" $gt 600).next
+val iphone = grater[Product].asObject(dbo)
+
+// Now it works, show that properties are typed:
 iphone.brand
 iphone.price
     </pre>
 
     <h3>Serialize: case class to DB object</h3>
     <pre class="scala">
-val nexus = Product("Samsung", "Galaxy Nexus", 600)
+val nexus = Product("Samsung", "Galaxy Nexus", 600, List(Review("Olivier", "Will it blend?")))
 // NB: since _id has a default value of None, no need to
 // specify it here
 
@@ -194,7 +217,7 @@ grater[Product].asDBObject(nexus) // OK, no typehint
     When an object is saved, we'd like its id to be updated. Since case classes are immutable, we need to build a copy of the object.
     <pre class="vim">
 [salat.scala]
-uncomment and explain save method
+explain save method
     </pre>
 
     <pre class="scala">
@@ -202,7 +225,7 @@ val nexus2 = save(nexus)
 // returns a copy with the id set - nexus2 maps the persisted object
 
 // To change the price, make a copy and save it.
-val nexus3 = nexus2.copy(price = 550)
+val nexus3 = nexus2.copy(price = 500)
 // Since the id is set, MongoDB will update the existing record.
 save(nexus3)
 
@@ -212,44 +235,13 @@ nexus2
 nexus3
     </pre>
 
-    <h3>Subdocuments</h3>
-    <pre class="vim">
-[salat.scala]
-uncomment review-related stuff
-    </pre>
-
-    <pre class="scala">
-:q
-console
-:l salat.scala
-val ipad = Product("Apple", "iPad 3", 800, List(Review("Olivier", "Will it blend?")))
-save(ipad)
-    </pre>
-
-    <pre class="mongo">
-db.products.find()
-    </pre>
-
     <h3>Load all documents, convert to case classes on the fly</h3>
     <pre class="scala">
-db("products").find().toSeq.map(grater[Product].
-  asObject(_)).mkString("\n")
-    </pre>
-    This fails, do you see why?
-    Answer: 'reviews' property is missing for some of the documents in our collection.
-
-    <pre class="vim">
-[salat.scala]
-add default value
-reviews: List[Review] = List()
-    </pre>
-
-    <pre class="scala">
-:q
-console
-:l salat.scala
-db("products").find().toSeq.map(grater[Product].
-  asObject(_)).mkString("\n")
+db("products").
+  find().
+  toSeq.
+  map(grater[Product].asObject(_)).
+  mkString("\n")
     </pre>
 
 
