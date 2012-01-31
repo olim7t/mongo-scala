@@ -267,13 +267,17 @@ val s2 = Product.findAll("model" -> "Galaxy SII").head
 
 // properties are encapsulated:
 s2.price
+
+// Record is integrated in Lift's stack (support for
+// validation, generating forms, integration in wizards,
+// etc.).
+
 // to get to the actual value:
 s2.price.is
 
 // Record automatically sets default values missing properties:
 s2.reviews
     </pre>
-    Record is well integrated in Lift's stack (support for validation, generating forms, integration in wizards, etc.).
 
     <h3>Create and save a record</h3>
     <pre class="scala">
@@ -281,6 +285,10 @@ val kindle = Product.createRecord.
   brand("Amazon").
   model("Kindle").
   price(100)
+
+// Object is mutable:
+kindle.reviews(List(Review.createRecord.author("Olivier").comment("Nice")))
+
 kindle.save
     </pre>
 
