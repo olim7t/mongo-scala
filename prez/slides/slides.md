@@ -5,6 +5,14 @@
 ![Scala](scala.png)
 
 
+!SLIDE subsection
+# Contents
+
+* showcase various options to access MongoDB from Scala
+* live coding
+* more material available at [github.com/olim7t/mongo-scala](http://github.com/olim7t/mongo-scala)
+
+
 !SLIDE
     @@@scala
     object OlivierMichallat {
@@ -18,14 +26,6 @@
 
       val github = "github.com/olim7t"
     }
-
-
-!SLIDE subsection
-# Contents
-
-* showcase various options to access MongoDB from Scala
-* live coding
-* more material available at [github.com/olim7t/mongo-scala](http://github.com/olim7t/mongo-scala)
 
 
 !SLIDE subsection
