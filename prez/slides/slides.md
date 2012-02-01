@@ -42,16 +42,16 @@
 > A general-purpose programmming language designed to express common
 programming patterns in a concise, elegant, and type-safe way.
 
-* blends object & functional
-* expressive
 * runs on the JVM (and .Net)
+* blends object & functional, statically typed
+* expressive
 
 
 !SLIDE subsection incremental
 # Your experience in Scala?
 
 * use it at work
-* use it at home
+* would like to use it at work
 * never tried
 
 
@@ -187,7 +187,7 @@ Boiler-plate free data classes.
     <th>Lift-record + Rogue</th>
   </tr>
   <tr>
-    <td>Map to standard Scala case classes (more functional)</td>
+    <td>Map to standard Scala case classes</td>
     <td>Extend Lift-specific types</td>
   </tr>
   <tr>
@@ -199,7 +199,7 @@ Boiler-plate free data classes.
     <td>Strongly-typed objects, typesafe queries with Rogue</td>
   </tr>
   <tr>
-    <td>Less forgiving of unexpected schema changes</td>
+    <td>Less forgiving of unexpected document structures</td>
     <td>Handles missing properties</td>
   </tr>
 </table>
