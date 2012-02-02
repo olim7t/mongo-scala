@@ -1,0 +1,317 @@
+<html>
+  <head>
+    <style type="text/css">
+      .mongo:before {
+        content: "mongo";
+        color: white;
+        background-color: darkgreen;
+        padding: 0 1em 0 1em;
+        display: block;
+        margin-bottom: 1em;
+      }
+      .mongo {
+        color: darkgreen;
+        border: 1px solid darkgreen;
+      }
+      .scala:before {
+        content: "scala";
+        color: white;
+        background-color: darkred;
+        padding: 0 1em 0 1em;
+        display: block;
+        margin-bottom: 1em;
+      }
+      .scala {
+        color: darkred;
+        border: 1px solid darkred;
+      }
+      .vim:before {
+        content: "vim";
+        color: white;
+        background-color: darkblue;
+        padding: 0 1em 0 1em;
+        display: block;
+        margin-bottom: 1em;
+      }
+      .vim {
+        color: darkblue;
+        border: 1px solid darkblue;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Connection setup</h2>
+
+    <h3>Start MongoDB</h3>
+    <pre>
+mongod
+    </pre>
+    <pre class="mongo">
+mongo
+db.getCollectionNames() // no collections (start with empty
+                        // database)
+    </pre>
+
+    <h3>Connect to MongoDB from Scala REPL</h3>
+    <pre class="scala">
+sbt
+console
+    </pre>
+    <pre class="vim">
+[casbah.scala]
+contains code to create connection
+host and port are specified, but have default values,
+could be omitted
+    </pre>
+    <pre class="scala">
+:l casbah.scala
+db.collectionNames    // empty set
+    </pre>
+
+    <h2>Casbah</h2>
+
+    <h3>Create a document in Scala, save to Mongo</h3>
+    <pre class="scala">
+// NB: use completion
+val s2 = MongoDBObject(
+  "brand" -> "Samsung",
+  "model" -> "Galaxy S2",
+  "price" -> 530)
+
+db("products").save(s2)
+
+// Object is now persisted and therefore has an id
+s2
+
+// now non-empty set
+db.collectionNames
+    </pre>
+
+    <h3>Check the result in Mongo</h3>
+    <pre class="mongo">
+db.products.find()
+    </pre>
+
+    <h3>The other way around: insert from Mongo console, load in Scala</h3>
+    <pre class="mongo">
+db.products.save( { brand: "Apple", model: "iPhone 4S",
+  price: NumberInt(630) } )
+// NB: need to specify NumberInt because JS numbers are
+// floats by default
+
+db.products.find()
+    </pre>
+
+    <pre class="scala">
+// BTW, also demonstrates query DSL
+val dbo = db("products").find("price" $gt 600).next
+    </pre>
+
+    <h3>Access object properties</h3>
+    <pre class="scala">
+dbo.get("model")
+dbo.get("price")
+// NB: result is not typed.
+
+// To force conversion:
+dbo.as[String]("model")
+dbo.as[Int]("price")
+
+// of course we get a failure if we specify the wrong type:
+dbo.as[String]("price")
+
+// and also with a property name that does not exist:
+dbo.as[String]("color")
+
+// however, we can handle optional properties:
+dbo.getAs[String]("model")
+dbo.getAs[String]("color")
+
+// DBObjects are actually maps:
+dbo.asInstanceOf[java.util.Map[String, Object]]
+
+// NB: java.util.Map because the request returned a Java
+// DBObject
+// when building a MongoDBObject manually it implements
+// Scala Map[String, AnyRef]
+</pre>
+    Maps are fine, but with a static language like Scala we probably expect to map to strongly-typed objects.
+
+    <h2>Salat</h2>
+    <h3>Model classes</h3>
+    <pre class="vim">
+[SalatModel.scala]
+"Product" case class with the properties we've used in our
+examples.
+"_id" is optional, gets a default value of None for objects
+that haven't been saved yet
+
+also contains an additional 'reviews' property that contains
+a list of nested documents.
+
+NB: Salat doesn't work when defining the classes directly
+in the REPL. It uses ScalaSig aka "pickled signature" -
+type information that is encoded in the compiled classes.
+    </pre>
+
+    <h3>Deserialize: DB object to case class</h3>
+    <pre class="scala">
+:l salat.scala
+
+// 'dbo' should still be in scope, otherwise:
+val dbo = db("products").find("price" $gt 600).next
+
+val iphone = grater[Product].asObject(dbo)
+// which FAILS...
+// since property 'reviews' is not defined in the documents
+// we've created so far (show error message).
+    </pre>
+
+    Salat does not automatically handle missing properties. In this case, we can solve the problem by specifying a default value:
+    <pre class="vim">
+[SalatModel.scala]
+// add default value:
+  reviews: List[Review] = List(),
+    </pre>
+
+    <pre class="scala">
+:q
+console
+:l salat.scala
+val dbo = db("products").find("price" $gt 600).next
+val iphone = grater[Product].asObject(dbo)
+
+// Now it works, show that properties are typed:
+iphone.brand
+iphone.price
+    </pre>
+
+    <h3>Serialize: case class to DB object</h3>
+    <pre class="scala">
+val nexus = Product("Samsung", "Galaxy Nexus", 600, List(Review("Olivier", "Will it blend?")))
+// NB: since _id has a default value of None, no need to
+// specify it here
+
+grater[Product].asDBObject(nexus)
+    </pre>
+    Before we save the object to the database, small detail to fix.
+    Do you notice anything particular in the output?
+    Answer: typeHint field added by Salat. By default, added everywhere, used for:
+    <ul>
+      <li>polymorphism (collection of a parent class, deserialize child instances)</li>
+      <li>looking up a grater by a db object (e.g. ctx.lookup(dbo))</li>
+    </ul>
+    Change the configuration to use hints only when necessary:
+
+    <pre class="vim">
+[salat.scala]
+uncomment custom context
+    </pre>
+
+    <pre class="scala">
+:l salat.scala
+grater[Product].asDBObject(nexus) // OK, no typehint
+    </pre>
+
+    <h3>Saving to the database</h3>
+    When an object is saved, we'd like its id to be updated. Since case classes are immutable, we need to build a copy of the object.
+    <pre class="vim">
+[salat.scala]
+explain save method
+    </pre>
+
+    <pre class="scala">
+val nexus2 = save(nexus)
+// returns a copy with the id set - nexus2 maps the persisted object
+
+// To change the price, make a copy and save it.
+val nexus3 = nexus2.copy(price = 500)
+// Since the id is set, MongoDB will update the existing record.
+save(nexus3)
+
+// Show that we have three different objects corresponding to the successive states:
+nexus
+nexus2
+nexus3
+    </pre>
+
+    <h3>Load all documents, convert to case classes on the fly</h3>
+    <pre class="scala">
+db("products").
+  find().
+  toSeq.
+  map(grater[Product].asObject(_)).
+  mkString("\n")
+    </pre>
+
+
+    <h2>Lift</h2>
+    <h3>Model classes</h3>
+    Lift has a persistence framework called Record, we only need to extend some of its types:
+    <pre class="vim">
+[LiftModel.scala]
+* class definition defines the fields as inner objects
+* companion object will provide global methods (finders, etc.)
+    </pre>
+    <pre class="vim">
+[lift.scala]
+connection initialization
+    </pre>
+
+    <h3>Load a record</h3>
+    <pre class="scala">
+:q
+console
+:l lift.scala
+val s2 = Product.findAll("model" -> "Galaxy SII").head
+
+// properties are encapsulated:
+s2.price
+
+// Record is integrated in Lift's stack (support for
+// validation, generating forms, integration in wizards,
+// etc.).
+
+// to get to the actual value:
+s2.price.is
+
+// Record automatically sets default values missing properties:
+s2.reviews
+    </pre>
+
+    <h3>Create and save a record</h3>
+    <pre class="scala">
+val kindle = Product.createRecord.
+  brand("Amazon").
+  model("Kindle").
+  price(100)
+
+// Object is mutable:
+kindle.reviews(List(Review.createRecord.author("Olivier").comment("Nice")))
+
+kindle.save
+    </pre>
+
+    <h3>Typesafe requests with Rogue</h3>
+    Until now, all of our requests were not type safe:
+    <pre class="scala">
+Product.findAll("model" -> "Kindle")
+// if there is a mistake on a field name, we simply get no results:
+Product.findAll("name" -> "Kindle")
+    </pre>
+
+    Rogue allows us to do this:
+    <pre class="scala">
+Product where (_.model eqs "Kindle") fetch
+// this time if we make a mistake we get a compile error
+Product where (_.name eqs "Kindle") fetch
+
+// More elaborate queries:
+Product where (_.reviews.subfield(_.author) eqs "Olivier") fetch
+// AFAIK, this only works for one level of subfield
+
+Product where (_.brand eqs "Apple") modify (_.price setTo 400) updateMulti
+    </pre>
+
+  </body>
+</html>

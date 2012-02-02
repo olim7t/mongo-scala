@@ -4,8 +4,8 @@ import net.liftweb.mongodb.record._
 import net.liftweb.mongodb.record.field._
 import net.liftweb.record.field._
 
-class GeekToy private() extends MongoRecord[GeekToy] with ObjectIdPk[GeekToy] {
-  def meta = GeekToy
+class Product private() extends MongoRecord[Product] with ObjectIdPk[Product] {
+  def meta = Product
 
   object brand extends StringField(this, 20)
   object model extends StringField(this, 40)
@@ -13,7 +13,7 @@ class GeekToy private() extends MongoRecord[GeekToy] with ObjectIdPk[GeekToy] {
   object reviews extends BsonRecordListField(this, Review)
 }
 
-object GeekToy extends GeekToy with MongoMetaRecord[GeekToy]
+object Product extends Product with MongoMetaRecord[Product]
 
 
 
